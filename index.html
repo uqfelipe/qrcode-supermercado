@@ -169,23 +169,25 @@
                         type: "LiveStream",
                         target: document.querySelector('#interactive'),
                         constraints: {
+                            facingMode: "environment",
                             width: 640,
-                            height: 480,
-                            facingMode: "environment"
+                            height: 480
                         }
                     },
                     decoder: {
-                        readers: ["ean_reader"],
+                        readers: [
+                            "ean_reader", 
+                            "ean_13_reader", 
+                            "upc_reader", 
+                            "upc_e_reader", 
+                            "code_39_reader",
+                            "code_128_reader"
+                        ],
+                        multiple: false
                     },
                     locate: true,
-                    locator: {
-                        patchSize: "medium",
-                        halfSample: true
-                    },
                     numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
                     frequency: 10,
-                    debug: false,
-                    locate: true,
                 }, function(err) {
                     if (err) {
                         console.log(err);
@@ -200,9 +202,8 @@
 
             // Evento de detecção de código de barras
             Quagga.onDetected(function(data) {
-                const code = data.codeResult.code;
-                document.getElementById("barcodeInput").value = code; // Preenche o campo automaticamente
-                exibirProduto(code); // Busca automaticamente o produto
+                const code = data.codeResult.code.trim(); // Remove espaços em branco
+                exibirProduto(code);
             });
 
             // Função para buscar o produto manualmente
