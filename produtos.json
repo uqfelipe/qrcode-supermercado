@@ -1,0 +1,35 @@
+[
+    {
+        "sku": "5449000000996",
+        "nome": "Açúcar Cristal Alvinho 5kg",
+        "ingredientes": "Açúcar Cristal Alvinho 5kg",
+        "imagem": "https://soaresemcasa.com.br/thumb/pccAfPKN0NGNdiWezEeGinKIgs9GdijYjNvcUXiP.png",
+        "supermercados": {
+            "soares": "19.90",
+            "Coelho Diniz": "20.50",
+            "Irmão": "20.50"
+        }
+    },
+    {
+        "sku": "5449000000996",
+        "nome": "Feijão Carioca",
+        "ingredientes": "Feijão Carioca, 1kg",
+        "imagem": "https://exemplo.com/imagem-feijao-carioca.jpg",
+        "supermercados": {
+            "soares": "7.50",
+            "Coelho Diniz": "25.50",
+            "Irmão": "7.80"
+        }
+    },
+    {
+        "sku": "SKU003",
+        "nome": "Macarrão Espaguete",
+        "ingredientes": "Macarrão Espaguete, 500g",
+        "imagem": "https://exemplo.com/imagem-macarrao-espaguete.jpg",
+        "supermercados": {
+            "soares": "3.20",
+            "Coelho Diniz": "2.50",
+            "Irmão": "3.50"
+        }
+    }
+]
