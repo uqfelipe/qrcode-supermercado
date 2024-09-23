@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitor de Código de Barras</title>
     <style>
-        /* O estilo continua o mesmo, com a linha vermelha piscando para ajudar no posicionamento do código */
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background-color: #f5f5f5;
@@ -47,17 +46,21 @@
         }
         .scanner-line {
             position: absolute;
-            top: 50%;
-            left: 0;
             width: 100%;
             height: 2px;
             background-color: red;
-            opacity: 0;
-            animation: blink 1s infinite;
+            animation: scanMove 3s infinite ease-in-out;
         }
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+        @keyframes scanMove {
+            0% {
+                top: 0;
+            }
+            50% {
+                top: 100%;
+            }
+            100% {
+                top: 0;
+            }
         }
         #manualInput {
             text-align: center;
