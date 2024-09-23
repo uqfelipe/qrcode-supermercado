@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitor de Código de Barras com ZXing</title>
     <style>
+        /* Estilos do seu projeto */
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background-color: #f5f5f5;
@@ -30,6 +31,7 @@
             padding-bottom: 10px;
         }
         #interactive {
+            position: relative;
             width: 100%;
             max-width: 600px;
             height: 400px;
@@ -38,12 +40,6 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        #loading {
-            display: none;
-            text-align: center;
-            font-size: 18px;
-            color: #3498db;
-        }
         #productInfo {
             display: none;
             background-color: #ecf0f1;
@@ -51,9 +47,18 @@
             border-radius: 8px;
             margin-top: 30px;
         }
-        #readAgainBtn {
+        #productImage {
+            width: 200px;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #loading {
             display: none;
-            margin-top: 20px;
+            text-align: center;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -64,80 +69,86 @@
         <div id="loading">Carregando...</div>
         <div id="productInfo">
             <h2 id="productName"></h2>
-            <p id="productIngredients"></p>
             <img id="productImage" src="" alt="">
             <h3>Preços:</h3>
             <ul id="productPrices"></ul>
         </div>
-        <input type="text" id="barcodeInput" placeholder="Digite o código de barras">
-        <button id="readAgainBtn">Ler Novamente</button>
+        <input type="text" id="barcodeInput" placeholder="Digite o código de barras" />
+        <button id="readAgainBtn" style="display: none;">Ler Novamente</button>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.0/zxing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/zxing.min.js"></script>
     <script>
-        const codeReader = new ZXing.BrowserMultiFormatReader();
-        let products;
+        document.addEventListener("DOMContentLoaded", function() {
+            let products;
 
-        // Carrega o arquivo JSON de produtos
-        fetch('produtos.json')
-            .then(response => response.json())
-            .then(data => {
-                products = data;
-            })
-            .catch(error => console.error('Erro ao carregar produtos.json:', error));
-
-        // Função para iniciar a leitura
-        function startZXing() {
-            codeReader.decodeOnceFromVideoDevice(null, 'interactive')
-                .then(result => {
-                    mostrarLoading(true);
-                    exibirProduto(result.text);
+            // Carrega o arquivo JSON de produtos
+            fetch('produtos.json')  
+                .then(response => response.json())
+                .then(data => {
+                    products = data;
                 })
-                .catch(err => console.error(err));
-        }
+                .catch(error => console.error('Erro ao carregar produtos.json:', error));
 
-        // Função para buscar e exibir o produto
-        function exibirProduto(code) {
-            setTimeout(() => {
-                const product = products.find(p => p.sku === code);
+            const codeReader = new ZXing.BrowserMultiFormatReader();
+            const videoInputDevices = [];
 
-                if (product) {
-                    document.getElementById("productName").innerHTML = product.nome;
-                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
-                    document.getElementById("productImage").src = product.imagem;
+            // Inicia a leitura do código de barras
+            function startZXing() {
+                codeReader.listVideoInputDevices()
+                    .then(devices => {
+                        videoInputDevices.push(...devices);
+                        return codeReader.decodeFromVideoDevice(videoInputDevices[0].deviceId, 'interactive', (result, err) => {
+                            if (result) {
+                                processBarcode(result.text);
+                            }
+                            if (err && !(err instanceof ZXing.NotFoundException)) {
+                                console.error(err);
+                            }
+                        });
+                    })
+                    .catch(err => console.error(err));
+            }
 
-                    const priceList = document.getElementById("productPrices");
-                    priceList.innerHTML = ''; // Limpa os preços anteriores
-                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${supermarket}: R$ ${price}`;
-                        priceList.appendChild(listItem);
+            // Processa o código de barras detectado
+            function processBarcode(code) {
+                mostrarLoading(true);
+                setTimeout(() => {
+                    const product = products.find(p => p.sku === code);
+                    mostrarLoading(false);
+                    if (product) {
+                        document.getElementById("productName").innerHTML = product.nome;
+                        document.getElementById("productImage").src = product.imagem;
+
+                        const priceList = document.getElementById("productPrices");
+                        priceList.innerHTML = ''; // Limpa os preços anteriores
+                        for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${supermarket}: R$ ${price}`;
+                            priceList.appendChild(listItem);
+                        }
+                        document.getElementById("productInfo").style.display = 'block';
+                    } else {
+                        alert("Produto não encontrado.");
                     }
+                    codeReader.reset();
+                }, 1000); // Atraso de 1 segundo para simular carregamento
+            }
 
-                    document.getElementById("productInfo").style.display = 'block';
-                } else {
-                    alert("Produto não encontrado.");
-                }
+            // Função para mostrar/ocultar o loading
+            function mostrarLoading(show) {
+                document.getElementById("loading").style.display = show ? 'block' : 'none';
+            }
 
-                mostrarLoading(false);
-                startZXing(); // Reinicia a leitura após a busca
-            }, 1000); // Atraso de 1 segundo para simular carregamento
-        }
+            // Botão para ler novamente
+            document.getElementById("readAgainBtn").addEventListener("click", function() {
+                document.getElementById("interactive").style.display = 'block';
+                document.getElementById("productInfo").style.display = 'none';
+                this.style.display = 'none';
+                startZXing(); // Reinicia a leitura
+            });
 
-        // Função para mostrar/ocultar o loading
-        function mostrarLoading(show) {
-            document.getElementById("loading").style.display = show ? 'block' : 'none';
-        }
-
-        // Botão para ler novamente
-        document.getElementById("readAgainBtn").addEventListener("click", function() {
-            document.getElementById("productInfo").style.display = 'none';
-            mostrarLoading(false);
-            startZXing(); // Reinicia a leitura
+            startZXing(); // Inicia a leitura ao carregar a página
         });
-
-        // Inicia a leitura assim que a página carrega
-        startZXing();
     </script>
 </body>
 </html>
