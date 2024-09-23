@@ -126,27 +126,30 @@
     #readAgainBtn:hover {
         background-color: #2980b9;
     }
-    /* Estilo da barra vermelha */
-    .moving-bar {
+    /* Estilo da barra animada */
+    #animatedBar {
         position: absolute;
+        top: 0;
         left: 50%;
         width: 10px;
-        height: 100px;
+        height: 100%;
         background-color: red;
         transform: translateX(-50%);
-        animation: moveBar 2s infinite alternate;
+        animation: moveBar 2s linear infinite;
     }
     @keyframes moveBar {
-        0% { top: 10%; }
-        100% { top: 80%; }
+        0% { top: 0; }
+        50% { top: 100%; }
+        100% { top: 0; }
     }
 </style>
 </head>
 <body>
     <div class="container">
-        <div class="moving-bar"></div> <!-- Barra vermelha que se move -->
         <h1>Leitor de Código de Barras</h1>
-        <div id="interactive" class="viewport"></div>
+        <div id="interactive" class="viewport">
+            <div id="animatedBar"></div> <!-- Barra animada -->
+        </div>
 
         <!-- Campo de entrada manual do código de barras -->
         <div id="manualInput">
