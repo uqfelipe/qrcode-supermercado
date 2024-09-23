@@ -191,9 +191,9 @@
                         constraints: {
                             width: { min: 1280, ideal: 1920, max: 2560 },
                             height: { min: 720, ideal: 1080, max: 1440 },
-                            facingMode: "environment", // Câmera traseira
-                            focusMode: "continuous", // Foco contínuo para melhorar a leitura
-                            frameRate: { ideal: 30, max: 60 } // Taxa de quadros alta para melhor qualidade
+                            facingMode: "environment",
+                            focusMode: "continuous",
+                            frameRate: { ideal: 30, max: 60 }
                         }
                     },
                     decoder: {
@@ -207,7 +207,6 @@
                     numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
                     frequency: 10,
                     debug: false,
-                    locate: true,
                 }, function(err) {
                     if (err) {
                         console.log(err);
@@ -271,12 +270,8 @@
             // Botão para ler o código novamente
             document.getElementById("readAgainBtn").addEventListener("click", function() {
                 document.getElementById("productInfo").style.display = 'none';
-
-                // Mostra a câmera e o campo de entrada novamente
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
-
-                // Esconde o botão de ler novamente
                 document.getElementById("readAgainBtn").style.display = 'none';
 
                 // Reinicia o Quagga
