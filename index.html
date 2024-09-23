@@ -1,194 +1,260 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor de QR Code</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <title>Leitor de Código de Barras</title>
     <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
         #interactive {
-            width: 100%;
-            height: 100vh;
             position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin: 0 auto 30px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
             overflow: hidden;
         }
-        #scanner-line {
-            position: absolute;
+        #interactive video {
             width: 100%;
-            height: 2px;
-            background-color: red;
-            top: 50%;
-            animation: scanning 2s infinite;
+            height: 100%;
+            object-fit: cover;
         }
-        @keyframes scanning {
-            0% { top: 0%; }
-            100% { top: 100%; }
-        }
-        #productInfo {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 8px;
+        #productInfo, #manualInput {
             display: none;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
         }
-        #zoomControls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
+        #productImage {
+            width: 200px;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        #zoomControls button {
-            margin: 5px;
-            padding: 10px;
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #34495e;
             font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-bottom: 20px;
         }
-        #zoomControls button:hover {
-            background-color: #0056b3;
+        h3 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
-        #barcodeInput {
-            display: none;
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.8);
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            font-size: 16px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <div id="interactive">
-        <div id="scanner-line"></div>
-    </div>
-    <div id="productInfo">
-        <h3>Informações do Produto:</h3>
-        <p id="productName"></p>
-        <p id="productPrice"></p>
-        <button id="readAgainBtn">Ler novamente</button>
-    </div>
-    <div id="barcodeInput">
-        <h3>Digite o código de barras:</h3>
-        <input type="text" id="manualBarcode" placeholder="Código de Barras">
-        <button id="submitBarcode">Enviar</button>
-    </div>
-
-    <div id="zoomControls">
-        <button id="zoomIn">+</button>
-        <button id="zoomOut">-</button>
+    <div class="container">
+        <h1>Leitor de Código de Barras</h1>
+        <div id="interactive" class="viewport"></div>
+        <div id="manualInput">
+            <label for="barcodeInput">Digite o código de barras:</label>
+            <input type="text" id="barcodeInput">
+            <button id="submitBarcode">Enviar</button>
+        </div>
+        <div id="productInfo">
+            <h2 id="productName"></h2>
+            <p id="productIngredients"></p>
+            <img id="productImage" src="" alt="">
+            <h3>Preços:</h3>
+            <ul id="productPrices"></ul>
+        </div>
+        <button id="readAgainBtn" style="display: none;">Ler novamente</button>
     </div>
 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script>
-        function startQuagga() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#interactive'),
-                    constraints: {
-                        width: { min: 1920, ideal: 3840, max: 7680 }, // Suporte para 4K e 8K
-                        height: { min: 1080, ideal: 2160, max: 4320 },
-                        facingMode: "environment", 
-                        focusMode: "continuous",
-                        zoom: 2, // Zoom digital inicial
-                        frameRate: { ideal: 60, max: 120 } // Aumenta a taxa de quadros
+        document.addEventListener("DOMContentLoaded", function() {
+            let products;
+
+            fetch('produtos.json')
+                .then(response => response.json())
+                .then(data => {
+                    products = data;
+                })
+                .catch(error => console.error('Erro ao carregar produtos.json:', error));
+
+            function startQuagga() {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#interactive'),
+                        constraints: {
+                            width: { min: 1920, ideal: 3840, max: 7680 },
+                            height: { min: 1080, ideal: 2160, max: 4320 },
+                            facingMode: "environment",
+                            focusMode: "continuous",
+                            zoom: 2,
+                            frameRate: { ideal: 60, max: 120 }
+                        }
+                    },
+                    decoder: {
+                        readers: ["ean_reader"],
+                    },
+                    locate: true,
+                    locator: {
+                        patchSize: "x-large",
+                        halfSample: false
+                    },
+                    numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
+                    frequency: 10,
+                    debug: false,
+                }, function(err) {
+                    if (err) {
+                        console.log(err);
+                        return;
                     }
-                },
-                decoder: {
-                    readers: ["ean_reader"],
-                },
-                locate: true,
-                locator: {
-                    patchSize: "x-large", // Aumenta a área de detecção
-                    halfSample: false // Melhor qualidade de detecção
-                },
-                numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
-                frequency: 10,
-                debug: false,
-            }, function(err) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                console.log("Leitura iniciada");
-                Quagga.start();
+                    console.log("Leitura iniciada");
+                    Quagga.start();
+                    adicionarControlesZoom();
+                });
+            }
 
-                // Adiciona controles de zoom após iniciar
-                adicionarControlesZoom();
-            });
-        }
+            function adicionarControlesZoom() {
+                const zoomControls = document.createElement('div');
+                zoomControls.innerHTML = `
+                    <button id="zoomIn">+</button>
+                    <button id="zoomOut">-</button>
+                `;
+                zoomControls.style.position = 'absolute';
+                zoomControls.style.top = '10px';
+                zoomControls.style.right = '10px';
+                document.querySelector('#interactive').appendChild(zoomControls);
 
-        // Função para adicionar controles de zoom na interface
-        function adicionarControlesZoom() {
-            let currentZoom = 2; // Zoom inicial de 2x
-            document.getElementById('zoomIn').addEventListener('click', () => {
-                currentZoom = Math.min(currentZoom + 0.5, 8); // Limita o zoom máximo a 8x
-                aplicarZoom(currentZoom);
-            });
-            document.getElementById('zoomOut').addEventListener('click', () => {
-                currentZoom = Math.max(currentZoom - 0.5, 1); // Limita o zoom mínimo a 1x
-                aplicarZoom(currentZoom);
-            });
-        }
+                let currentZoom = 2;
+                document.getElementById('zoomIn').addEventListener('click', () => {
+                    currentZoom = Math.min(currentZoom + 0.5, 8);
+                    aplicarZoom(currentZoom);
+                });
+                document.getElementById('zoomOut').addEventListener('click', () => {
+                    currentZoom = Math.max(currentZoom - 0.5, 1);
+                    aplicarZoom(currentZoom);
+                });
+            }
 
-        // Função para aplicar o zoom digital na câmera
-        function aplicarZoom(zoom) {
-            const videoTrack = Quagga.CameraAccess.getActiveTrack();
-            if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
-                const capabilities = videoTrack.getCapabilities();
-                if (capabilities.zoom) {
-                    videoTrack.applyConstraints({ advanced: [{ zoom: zoom }] })
-                        .catch(e => console.error("Erro ao aplicar zoom:", e));
+            function aplicarZoom(zoom) {
+                const videoTrack = Quagga.CameraAccess.getActiveTrack();
+                if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+                    const capabilities = videoTrack.getCapabilities();
+                    if (capabilities.zoom) {
+                        videoTrack.applyConstraints({advanced: [{zoom: zoom}]})
+                            .catch(e => console.error("Erro ao aplicar zoom:", e));
+                    }
                 }
             }
-        }
 
-        // Inicia o Quagga ao carregar a página
-        document.addEventListener('DOMContentLoaded', function() {
-            startQuagga();
+            Quagga.onDetected(function(data) {
+                const code = data.codeResult.code;
+                const product = products.find(p => p.sku === code);
 
-            // Botão para ler o código novamente
+                if (product) {
+                    document.getElementById("productName").innerHTML = product.nome;
+                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                    document.getElementById("productImage").src = product.imagem;
+
+                    const priceList = document.getElementById("productPrices");
+                    priceList.innerHTML = '';
+                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${supermarket}: R$ ${price}`;
+                        priceList.appendChild(listItem);
+                    }
+
+                    document.getElementById("productInfo").style.display = 'block';
+                    document.getElementById("interactive").style.display = 'none';
+                    document.getElementById("manualInput").style.display = 'none';
+                    document.getElementById("readAgainBtn").style.display = 'block';
+
+                    Quagga.stop();
+                } else {
+                    alert("Produto não encontrado.");
+                }
+            });
+
             document.getElementById("readAgainBtn").addEventListener("click", function() {
                 document.getElementById("productInfo").style.display = 'none';
                 document.getElementById("interactive").style.display = 'block';
-                document.getElementById("barcodeInput").style.display = 'none';
-
-                // Reinicia o Quagga
+                document.getElementById("manualInput").style.display = 'block';
+                document.getElementById("readAgainBtn").style.display = 'none';
                 startQuagga();
             });
 
-            // Simula o envio manual do código de barras
             document.getElementById("submitBarcode").addEventListener("click", function() {
-                const barcode = document.getElementById("manualBarcode").value;
-                produtoDetectado({ nome: "Produto Manual", preco: "00,00" });
+                const code = document.getElementById("barcodeInput").value;
+                const product = products.find(p => p.sku === code);
+
+                if (product) {
+                    document.getElementById("productName").innerHTML = product.nome;
+                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                    document.getElementById("productImage").src = product.imagem;
+
+                    const priceList = document.getElementById("productPrices");
+                    priceList.innerHTML = '';
+                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${supermarket}: R$ ${price}`;
+                        priceList.appendChild(listItem);
+                    }
+
+                    document.getElementById("productInfo").style.display = 'block';
+                    document.getElementById("interactive").style.display = 'none';
+                    document.getElementById("manualInput").style.display = 'none';
+                    document.getElementById("readAgainBtn").style.display = 'block';
+                } else {
+                    alert("Produto não encontrado.");
+                }
             });
+
+            startQuagga();
         });
-
-        // Simula a detecção de produto e exibe informações
-        function produtoDetectado(dados) {
-            if (dados) {
-                document.getElementById("productInfo").style.display = 'block';
-                document.getElementById("productName").innerText = "Nome: " + dados.nome;
-                document.getElementById("productPrice").innerText = "Preço: R$" + dados.preco;
-
-                // Esconde a câmera e o campo de entrada manual
-                document.getElementById("interactive").style.display = 'none';
-                document.getElementById("barcodeInput").style.display = 'none';
-
-                // Para o Quagga
-                Quagga.stop();
-            } else {
-                alert("Produto não encontrado.");
-            }
-        }
     </script>
 </body>
 </html>
