@@ -3,151 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor de Código de Barras com ZXing</title>
-    <style>
-        /* Estilos do seu projeto */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            font-size: 28px;
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        #interactive {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 400px;
-            margin: 0 auto 30px;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #productInfo {
-            display: none;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-        }
-        #productImage {
-            width: 200px;
-            height: auto;
-            margin: 20px auto;
-            display: block;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-    </style>
+    <title>Leitor de Código de Barras</title>
+<style>
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+        margin: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        font-size: 28px;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    #interactive {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        height: 400px;
+        margin: 0 auto 30px;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    #interactive video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    #manualInput {
+        text-align: center;
+        margin-top: 20px;
+    }
+    #barcodeInput {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 80%;
+    }
+    #submitCodeBtn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #submitCodeBtn:hover {
+        background-color: #2980b9;
+    }
+    #productInfo {
+        display: none;
+        background-color: #ecf0f1;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 30px;
+    }
+    #productImage {
+        width: 200px;
+        height: auto;
+        margin: 20px auto;
+        display: block;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        color: #2c3e50;
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+    p {
+        color: #34495e;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    h3 {
+        color: #2c3e50;
+        font-size: 20px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding: 8px;
+        background-color: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    #readAgainBtn {
+        display: none;
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #readAgainBtn:hover {
+        background-color: #2980b9;
+    }
+</style>
 </head>
 <body>
     <div class="container">
-        <h1>Leitor de Código de Barras com ZXing</h1>
-        <div id="interactive"></div>
-        <div id="loading">Carregando...</div>
+        <h1>Leitor de Código de Barras</h1>
+        <div id="interactive" class="viewport"></div>
+
+        <!-- Campo de entrada manual do código de barras -->
+        <div id="manualInput">
+            <input type="text" id="barcodeInput" placeholder="Digite o código de barras" />
+            <button id="submitCodeBtn">Buscar Produto</button>
+        </div>
+
         <div id="productInfo">
             <h2 id="productName"></h2>
+            <p id="productIngredients"></p>
             <img id="productImage" src="" alt="">
             <h3>Preços:</h3>
             <ul id="productPrices"></ul>
         </div>
-        <input type="text" id="barcodeInput" placeholder="Digite o código de barras" />
-        <button id="readAgainBtn" style="display: none;">Ler Novamente</button>
+        <button id="readAgainBtn">Ler Novamente</button>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/zxing.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let products;
 
             // Carrega o arquivo JSON de produtos
-            fetch('produtos.json')  
+            fetch('produtos.json')
                 .then(response => response.json())
                 .then(data => {
                     products = data;
                 })
                 .catch(error => console.error('Erro ao carregar produtos.json:', error));
 
-            const codeReader = new ZXing.BrowserMultiFormatReader();
-            const videoInputDevices = [];
-
-            // Inicia a leitura do código de barras
-            function startZXing() {
-                codeReader.listVideoInputDevices()
-                    .then(devices => {
-                        videoInputDevices.push(...devices);
-                        return codeReader.decodeFromVideoDevice(videoInputDevices[0].deviceId, 'interactive', (result, err) => {
-                            if (result) {
-                                processBarcode(result.text);
-                            }
-                            if (err && !(err instanceof ZXing.NotFoundException)) {
-                                console.error(err);
-                            }
-                        });
-                    })
-                    .catch(err => console.error(err));
-            }
-
-            // Processa o código de barras detectado
-            function processBarcode(code) {
-                mostrarLoading(true);
-                setTimeout(() => {
-                    const product = products.find(p => p.sku === code);
-                    mostrarLoading(false);
-                    if (product) {
-                        document.getElementById("productName").innerHTML = product.nome;
-                        document.getElementById("productImage").src = product.imagem;
-
-                        const priceList = document.getElementById("productPrices");
-                        priceList.innerHTML = ''; // Limpa os preços anteriores
-                        for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                            const listItem = document.createElement('li');
-                            listItem.textContent = `${supermarket}: R$ ${price}`;
-                            priceList.appendChild(listItem);
+            function startQuagga() {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#interactive'),
+                        constraints: {
+                            width: 640,
+                            height: 480,
+                            facingMode: "environment"
                         }
-                        document.getElementById("productInfo").style.display = 'block';
-                    } else {
-                        alert("Produto não encontrado.");
+                    },
+                    decoder: {
+                        readers: ["ean_reader"],
+                    },
+                    locate: true,
+                    locator: {
+                        patchSize: "medium",
+                        halfSample: true
+                    },
+                    numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
+                    frequency: 10,
+                    debug: false,
+                    locate: true,
+                }, function(err) {
+                    if (err) {
+                        console.log(err);
+                        return;
                     }
-                    codeReader.reset();
-                }, 1000); // Atraso de 1 segundo para simular carregamento
+                    console.log("Leitura iniciada");
+                    Quagga.start();
+                });
             }
 
-            // Função para mostrar/ocultar o loading
-            function mostrarLoading(show) {
-                document.getElementById("loading").style.display = show ? 'block' : 'none';
-            }
+            startQuagga();
 
-            // Botão para ler novamente
-            document.getElementById("readAgainBtn").addEventListener("click", function() {
-                document.getElementById("interactive").style.display = 'block';
-                document.getElementById("productInfo").style.display = 'none';
-                this.style.display = 'none';
-                startZXing(); // Reinicia a leitura
+            // Evento de detecção de código de barras
+            Quagga.onDetected(function(data) {
+                const code = data.codeResult.code;
+                exibirProduto(code);
             });
 
-            startZXing(); // Inicia a leitura ao carregar a página
+            // Função para buscar o produto manualmente
+            document.getElementById("submitCodeBtn").addEventListener("click", function() {
+                const manualCode = document.getElementById("barcodeInput").value;
+                if (manualCode) {
+                    exibirProduto(manualCode);
+                }
+            });
+
+            // Função para exibir o produto
+            function exibirProduto(code) {
+                const product = products.find(p => p.sku === code);
+
+                if (product) {
+                    // Exibe as informações do produto
+                    document.getElementById("productName").innerHTML = product.nome;
+                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                    document.getElementById("productImage").src = product.imagem;
+
+                    // Exibe os preços nos supermercados
+                    const priceList = document.getElementById("productPrices");
+                    priceList.innerHTML = ''; 
+                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${supermarket}: R$ ${price}`;
+                        priceList.appendChild(listItem);
+                    }
+
+                    // Mostra a div com as informações do produto
+                    document.getElementById("productInfo").style.display = 'block';
+                    document.getElementById("readAgainBtn").style.display = 'inline-block';
+
+                    // Oculta a câmera e o campo de entrada
+                    document.getElementById("interactive").style.display = 'none';
+                    document.getElementById("manualInput").style.display = 'none';
+
+                    Quagga.stop(); // Para a leitura assim que detectado
+                } else {
+                    alert("Produto não encontrado.");
+                    document.getElementById("productInfo").style.display = 'none';
+                }
+            }
+
+            // Função para reiniciar a leitura
+            document.getElementById("readAgainBtn").addEventListener("click", function() {
+                // Esconde as informações do produto
+                document.getElementById("productInfo").style.display = 'none';
+
+                // Mostra a câmera e o campo de entrada novamente
+                document.getElementById("interactive").style.display = 'block';
+                document.getElementById("manualInput").style.display = 'block';
+
+                // Esconde o botão de ler novamente
+                document.getElementById("readAgainBtn").style.display = 'none';
+
+                // Reinicia o Quagga
+                startQuagga();
+            });
         });
     </script>
 </body>
