@@ -250,35 +250,37 @@
             function exibirProduto(code) {
                 const product = products.find(p => p.sku === code);
 
-                // Verifica se o produto foi encontrado
-                if (product) {
-                    // Exibe as informações do produto
-                    document.getElementById("productName").innerHTML = product.nome;
-                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
-                    document.getElementById("productImage").src = product.imagem;
+                // Simular um atraso na busca dos dados (opcional)
+                setTimeout(() => {
+                    if (product) {
+                        // Exibe as informações do produto
+                        document.getElementById("productName").innerHTML = product.nome;
+                        document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                        document.getElementById("productImage").src = product.imagem;
 
-                    // Exibe os preços nos supermercados
-                    const priceList = document.getElementById("productPrices");
-                    priceList.innerHTML = ''; 
-                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${supermarket}: R$ ${price}`;
-                        priceList.appendChild(listItem);
+                        // Exibe os preços nos supermercados
+                        const priceList = document.getElementById("productPrices");
+                        priceList.innerHTML = ''; 
+                        for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${supermarket}: R$ ${price}`;
+                            priceList.appendChild(listItem);
+                        }
+
+                        // Mostra a div com as informações do produto
+                        document.getElementById("productInfo").style.display = 'block';
+                        document.getElementById("readAgainBtn").style.display = 'inline-block';
+
+                        // Oculta a câmera e o campo de entrada
+                        document.getElementById("interactive").style.display = 'none';
+                        document.getElementById("manualInput").style.display = 'none';
+                    } else {
+                        alert("Produto não encontrado.");
                     }
 
-                    // Mostra a div com as informações do produto
-                    document.getElementById("productInfo").style.display = 'block';
-                    document.getElementById("readAgainBtn").style.display = 'inline-block';
-
-                    // Oculta a câmera e o campo de entrada
-                    document.getElementById("interactive").style.display = 'none';
-                    document.getElementById("manualInput").style.display = 'none';
-                } else {
-                    alert("Produto não encontrado.");
-                }
-
-                mostrarLoading(false); // Esconder loading
-                Quagga.stop(); // Para a leitura
+                    mostrarLoading(false); // Esconder loading
+                    Quagga.stop(); // Para a leitura assim que detectado
+                }, 1000); // Atraso de 1 segundo para simular carregamento
             }
 
             // Função para mostrar/ocultar o loading
@@ -288,7 +290,6 @@
 
             // Botão para ler novamente
             document.getElementById("readAgainBtn").addEventListener("click", function() {
-                // Reinicia o Quagga e mostra novamente a câmera e o campo de entrada
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
                 document.getElementById("productInfo").style.display = 'none';
@@ -296,8 +297,7 @@
                 // Esconde o botão de ler novamente
                 document.getElementById("readAgainBtn").style.display = 'none';
 
-                // Reinicia o Quagga
-                startQuagga();
+                startQuagga(); // Reinicia o Quagga
             });
         });
     </script>
