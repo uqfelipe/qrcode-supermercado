@@ -250,37 +250,35 @@
             function exibirProduto(code) {
                 const product = products.find(p => p.sku === code);
 
-                // Simular um atraso na busca dos dados (opcional)
-                setTimeout(() => {
-                    if (product) {
-                        // Exibe as informações do produto
-                        document.getElementById("productName").innerHTML = product.nome;
-                        document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
-                        document.getElementById("productImage").src = product.imagem;
+                // Verifica se o produto foi encontrado
+                if (product) {
+                    // Exibe as informações do produto
+                    document.getElementById("productName").innerHTML = product.nome;
+                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                    document.getElementById("productImage").src = product.imagem;
 
-                        // Exibe os preços nos supermercados
-                        const priceList = document.getElementById("productPrices");
-                        priceList.innerHTML = ''; 
-                        for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                            const listItem = document.createElement('li');
-                            listItem.textContent = `${supermarket}: R$ ${price}`;
-                            priceList.appendChild(listItem);
-                        }
-
-                        // Mostra a div com as informações do produto
-                        document.getElementById("productInfo").style.display = 'block';
-                        document.getElementById("readAgainBtn").style.display = 'inline-block';
-
-                        // Oculta a câmera e o campo de entrada
-                        document.getElementById("interactive").style.display = 'none';
-                        document.getElementById("manualInput").style.display = 'none';
-                    } else {
-                        alert("Produto não encontrado.");
+                    // Exibe os preços nos supermercados
+                    const priceList = document.getElementById("productPrices");
+                    priceList.innerHTML = ''; 
+                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${supermarket}: R$ ${price}`;
+                        priceList.appendChild(listItem);
                     }
 
-                    mostrarLoading(false); // Esconder loading
-                    Quagga.stop(); // Para a leitura assim que detectado
-                }, 1000); // Atraso de 1 segundo para simular carregamento
+                    // Mostra a div com as informações do produto
+                    document.getElementById("productInfo").style.display = 'block';
+                    document.getElementById("readAgainBtn").style.display = 'inline-block';
+
+                    // Oculta a câmera e o campo de entrada
+                    document.getElementById("interactive").style.display = 'none';
+                    document.getElementById("manualInput").style.display = 'none';
+                } else {
+                    alert("Produto não encontrado.");
+                }
+
+                mostrarLoading(false); // Esconder loading
+                Quagga.stop(); // Para a leitura
             }
 
             // Função para mostrar/ocultar o loading
