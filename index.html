@@ -199,14 +199,20 @@
             // Evento de detecção de código de barras
             Quagga.onDetected(function(data) {
                 const code = data.codeResult.code;
-                exibirProduto(code);
+
+                // Verifica se o código é numérico
+                if (/^\d+$/.test(code)) {
+                    exibirProduto(code);
+                }
             });
 
             // Função para buscar o produto manualmente
             document.getElementById("submitCodeBtn").addEventListener("click", function() {
                 const manualCode = document.getElementById("barcodeInput").value.trim(); // Usando trim()
-                if (manualCode) {
+                if (/^\d+$/.test(manualCode)) { // Verifica se é numérico
                     exibirProduto(manualCode);
+                } else {
+                    alert("Por favor, insira um código de barras válido.");
                 }
             });
 
