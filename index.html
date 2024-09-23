@@ -44,6 +44,15 @@
         height: 100%;
         object-fit: cover;
     }
+    #loading {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        color: #3498db;
+    }
     #manualInput {
         text-align: center;
         margin-top: 20px;
@@ -138,7 +147,7 @@
         0% {
             top: 0;
         }
-        100% {
+        50% {
             top: 100px; /* Ajuste a altura máxima */
         }
         100% {
@@ -152,6 +161,7 @@
         <h1>Leitor de Código de Barras</h1>
         <div id="interactive" class="viewport">
             <div id="redBar"></div>
+            <div id="loading">Carregando...</div>
         </div>
 
         <!-- Campo de entrada manual do código de barras -->
@@ -223,6 +233,7 @@
             // Evento de detecção de código de barras
             Quagga.onDetected(function(data) {
                 const code = data.codeResult.code;
+                mostrarLoading(true); // Mostrar loading
                 exibirProduto(code);
             });
 
@@ -230,6 +241,7 @@
             document.getElementById("submitCodeBtn").addEventListener("click", function() {
                 const manualCode = document.getElementById("barcodeInput").value;
                 if (manualCode) {
+                    mostrarLoading(true); // Mostrar loading
                     exibirProduto(manualCode);
                 }
             });
@@ -238,44 +250,50 @@
             function exibirProduto(code) {
                 const product = products.find(p => p.sku === code);
 
-                if (product) {
-                    // Exibe as informações do produto
-                    document.getElementById("productName").innerHTML = product.nome;
-                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
-                    document.getElementById("productImage").src = product.imagem;
+                // Simular um atraso na busca dos dados (opcional)
+                setTimeout(() => {
+                    if (product) {
+                        // Exibe as informações do produto
+                        document.getElementById("productName").innerHTML = product.nome;
+                        document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                        document.getElementById("productImage").src = product.imagem;
 
-                    // Exibe os preços nos supermercados
-                    const priceList = document.getElementById("productPrices");
-                    priceList.innerHTML = ''; 
-                    for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${supermarket}: R$ ${price}`;
-                        priceList.appendChild(listItem);
+                        // Exibe os preços nos supermercados
+                        const priceList = document.getElementById("productPrices");
+                        priceList.innerHTML = ''; 
+                        for (let [supermarket, price] of Object.entries(product.supermercados)) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${supermarket}: R$ ${price}`;
+                            priceList.appendChild(listItem);
+                        }
+
+                        // Mostra a div com as informações do produto
+                        document.getElementById("productInfo").style.display = 'block';
+                        document.getElementById("readAgainBtn").style.display = 'inline-block';
+
+                        // Oculta a câmera e o campo de entrada
+                        document.getElementById("interactive").style.display = 'none';
+                        document.getElementById("manualInput").style.display = 'none';
+                    } else {
+                        alert("Produto não encontrado.");
                     }
 
-                    // Mostra a div com as informações do produto
-                    document.getElementById("productInfo").style.display = 'block';
-                    document.getElementById("readAgainBtn").style.display = 'inline-block';
-
-                    // Oculta a câmera e o campo de entrada
-                    document.getElementById("interactive").style.display = 'none';
-                    document.getElementById("manualInput").style.display = 'none';
-
+                    mostrarLoading(false); // Esconder loading
                     Quagga.stop(); // Para a leitura assim que detectado
-                } else {
-                    alert("Produto não encontrado.");
-                    document.getElementById("productInfo").style.display = 'none';
-                }
+                }, 1000); // Atraso de 1 segundo para simular carregamento
             }
 
-            // Função para reiniciar a leitura
-            document.getElementById("readAgainBtn").addEventListener("click", function() {
-                // Esconde as informações do produto
-                document.getElementById("productInfo").style.display = 'none';
+            // Função para mostrar/ocultar o loading
+            function mostrarLoading(show) {
+                document.getElementById("loading").style.display = show ? 'block' : 'none';
+            }
 
-                // Mostra a câmera e o campo de entrada novamente
+            // Botão para ler novamente
+            document.getElementById("readAgainBtn").addEventListener("click", function() {
+                // Reinicia o Quagga e mostra novamente a câmera e o campo de entrada
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
+                document.getElementById("productInfo").style.display = 'none';
 
                 // Esconde o botão de ler novamente
                 document.getElementById("readAgainBtn").style.display = 'none';
