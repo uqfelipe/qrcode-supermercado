@@ -20,7 +20,6 @@
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        position: relative;
     }
     h1 {
         font-size: 28px;
@@ -126,21 +125,25 @@
     #readAgainBtn:hover {
         background-color: #2980b9;
     }
-    /* Estilo da barra animada */
-    #animatedBar {
+    /* Estilos para a barra vermelha */
+    #redBar {
         position: absolute;
-        top: 0;
-        left: 50%;
-        width: 10px;
-        height: 100%;
+        width: 100%;
+        height: 5px;
         background-color: red;
-        transform: translateX(-50%);
-        animation: moveBar 2s linear infinite;
+        animation: moveBar 1s linear infinite;
     }
+
     @keyframes moveBar {
-        0% { top: 0; }
-        50% { top: 100%; }
-        100% { top: 0; }
+        0% {
+            top: 0;
+        }
+        50% {
+            top: 100px; /* Ajuste a altura máxima */
+        }
+        100% {
+            top: 0;
+        }
     }
 </style>
 </head>
@@ -148,7 +151,7 @@
     <div class="container">
         <h1>Leitor de Código de Barras</h1>
         <div id="interactive" class="viewport">
-            <div id="animatedBar"></div> <!-- Barra animada -->
+            <div id="redBar"></div>
         </div>
 
         <!-- Campo de entrada manual do código de barras -->
