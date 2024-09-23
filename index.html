@@ -30,7 +30,6 @@
             padding-bottom: 10px;
         }
         #interactive {
-            position: relative;
             width: 100%;
             max-width: 600px;
             height: 400px;
@@ -39,10 +38,11 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        #loading {
+            display: none;
+            text-align: center;
+            font-size: 18px;
+            color: #3498db;
         }
         #productInfo {
             display: none;
@@ -51,20 +51,7 @@
             border-radius: 8px;
             margin-top: 30px;
         }
-        #productImage {
-            width: 200px;
-            height: auto;
-            margin: 20px auto;
-            display: block;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-        #manualInput {
+        #readAgainBtn {
             display: none;
             margin-top: 20px;
         }
@@ -72,57 +59,46 @@
 </head>
 <body>
     <div class="container">
-        <h1>Leitor de Código de Barras</h1>
+        <h1>Leitor de Código de Barras com ZXing</h1>
         <div id="interactive"></div>
         <div id="loading">Carregando...</div>
-        <div id="manualInput">
-            <h3>Ou insira o código de barras:</h3>
-            <input type="text" id="barcodeInput" placeholder="Digite o código aqui">
-            <button id="searchBtn">Buscar Produto</button>
-        </div>
         <div id="productInfo">
             <h2 id="productName"></h2>
-            <img id="productImage" src="" alt="">
             <p id="productIngredients"></p>
+            <img id="productImage" src="" alt="">
             <h3>Preços:</h3>
             <ul id="productPrices"></ul>
-            <button id="readAgainBtn">Ler Novamente</button>
         </div>
+        <input type="text" id="barcodeInput" placeholder="Digite o código de barras">
+        <button id="readAgainBtn">Ler Novamente</button>
     </div>
 
-    <script src="https://cdn.rawgit.com/zxing/zxing/master/js/zxing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.0/zxing.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let products;
+        const codeReader = new ZXing.BrowserMultiFormatReader();
+        let products;
 
-            // Carrega o arquivo JSON de produtos
-            fetch('produtos.json')
-                .then(response => response.json())
-                .then(data => {
-                    products = data;
+        // Carrega o arquivo JSON de produtos
+        fetch('produtos.json')
+            .then(response => response.json())
+            .then(data => {
+                products = data;
+            })
+            .catch(error => console.error('Erro ao carregar produtos.json:', error));
+
+        // Função para iniciar a leitura
+        function startZXing() {
+            codeReader.decodeOnceFromVideoDevice(null, 'interactive')
+                .then(result => {
+                    mostrarLoading(true);
+                    exibirProduto(result.text);
                 })
-                .catch(error => console.error('Erro ao carregar produtos.json:', error));
+                .catch(err => console.error(err));
+        }
 
-            const codeReader = new ZXing.BrowserMultiFormatReader();
-            const videoElement = document.createElement('video');
-
-            // Inicia a leitura do código de barras
-            function startZXing() {
-                codeReader.decodeFromVideoDevice(null, videoElement, (result, err) => {
-                    if (result) {
-                        mostrarLoading(true);
-                        setTimeout(() => {
-                            exibirProduto(result.text);
-                        }, 1000); // Atraso para simular carregamento
-                    }
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
-                    }
-                });
-            }
-
-            // Exibir informações do produto
-            function exibirProduto(code) {
+        // Função para buscar e exibir o produto
+        function exibirProduto(code) {
+            setTimeout(() => {
                 const product = products.find(p => p.sku === code);
 
                 if (product) {
@@ -144,40 +120,24 @@
                 }
 
                 mostrarLoading(false);
-                codeReader.reset();
-            }
+                startZXing(); // Reinicia a leitura após a busca
+            }, 1000); // Atraso de 1 segundo para simular carregamento
+        }
 
-            // Mostrar/ocultar loading
-            function mostrarLoading(show) {
-                document.getElementById("loading").style.display = show ? 'block' : 'none';
-            }
+        // Função para mostrar/ocultar o loading
+        function mostrarLoading(show) {
+            document.getElementById("loading").style.display = show ? 'block' : 'none';
+        }
 
-            // Evento para buscar produto manualmente
-            document.getElementById("searchBtn").addEventListener("click", function() {
-                const code = document.getElementById("barcodeInput").value;
-                if (code) {
-                    mostrarLoading(true);
-                    setTimeout(() => {
-                        exibirProduto(code);
-                    }, 1000);
-                } else {
-                    alert("Por favor, insira um código de barras.");
-                }
-            });
-
-            // Botão para ler novamente
-            document.getElementById("readAgainBtn").addEventListener("click", function() {
-                document.getElementById("interactive").style.display = 'block';
-                document.getElementById("manualInput").style.display = 'block';
-                document.getElementById("productInfo").style.display = 'none';
-                document.getElementById("barcodeInput").value = '';
-
-                startZXing(); // Reinicia a leitura
-            });
-
-            // Inicia a leitura quando a página carrega
-            startZXing();
+        // Botão para ler novamente
+        document.getElementById("readAgainBtn").addEventListener("click", function() {
+            document.getElementById("productInfo").style.display = 'none';
+            mostrarLoading(false);
+            startZXing(); // Reinicia a leitura
         });
+
+        // Inicia a leitura assim que a página carrega
+        startZXing();
     </script>
 </body>
 </html>
