@@ -207,7 +207,7 @@
 
             // Função para buscar o produto manualmente
             document.getElementById("submitCodeBtn").addEventListener("click", function() {
-                const manualCode = document.getElementById("barcodeInput").value;
+                const manualCode = document.getElementById("barcodeInput").value.trim(); // Remove espaços em branco
                 if (manualCode) {
                     exibirProduto(manualCode);
                 }
