@@ -152,7 +152,6 @@
             <div class="scanner-line"></div>
         </div>
 
-        <!-- Campo de entrada manual do código de barras -->
         <div id="manualInput">
             <input type="text" id="barcodeInput" placeholder="Digite o código de barras" />
             <button id="submitCodeBtn">Buscar Produto</button>
@@ -207,6 +206,7 @@
                     numOfWorkers: navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4,
                     frequency: 10,
                     debug: false,
+                    locate: true,
                 }, function(err) {
                     if (err) {
                         console.log(err);
@@ -238,29 +238,24 @@
                 const product = products.find(p => p.sku === code);
 
                 if (product) {
-                    // Exibe as informações do produto
                     document.getElementById("productName").innerHTML = product.nome;
                     document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
                     document.getElementById("productImage").src = product.imagem;
 
-                    // Exibe os preços nos supermercados
                     const priceList = document.getElementById("productPrices");
-                    priceList.innerHTML = ''; 
+                    priceList.innerHTML = '';
                     for (let [supermarket, price] of Object.entries(product.supermercados)) {
                         const listItem = document.createElement('li');
                         listItem.textContent = `${supermarket}: R$ ${price}`;
                         priceList.appendChild(listItem);
                     }
 
-                    // Mostra a div com as informações do produto
                     document.getElementById("productInfo").style.display = 'block';
                     document.getElementById("readAgainBtn").style.display = 'inline-block';
 
-                    // Oculta a câmera e o campo de entrada
                     document.getElementById("interactive").style.display = 'none';
                     document.getElementById("manualInput").style.display = 'none';
 
-                    // Para o Quagga
                     Quagga.stop();
                 } else {
                     alert("Produto não encontrado.");
@@ -270,11 +265,12 @@
             // Botão para ler o código novamente
             document.getElementById("readAgainBtn").addEventListener("click", function() {
                 document.getElementById("productInfo").style.display = 'none';
+
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
+
                 document.getElementById("readAgainBtn").style.display = 'none';
 
-                // Reinicia o Quagga
                 startQuagga();
             });
         });
