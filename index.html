@@ -20,6 +20,7 @@
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
     }
     h1 {
         font-size: 28px;
@@ -125,10 +126,25 @@
     #readAgainBtn:hover {
         background-color: #2980b9;
     }
+    /* Estilo da barra vermelha */
+    .moving-bar {
+        position: absolute;
+        left: 50%;
+        width: 10px;
+        height: 100px;
+        background-color: red;
+        transform: translateX(-50%);
+        animation: moveBar 2s infinite alternate;
+    }
+    @keyframes moveBar {
+        0% { top: 10%; }
+        100% { top: 80%; }
+    }
 </style>
 </head>
 <body>
     <div class="container">
+        <div class="moving-bar"></div> <!-- Barra vermelha que se move -->
         <h1>Leitor de Código de Barras</h1>
         <div id="interactive" class="viewport"></div>
 
