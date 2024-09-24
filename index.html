@@ -230,35 +230,33 @@
                     const priceList = document.getElementById("productPrices");
                     priceList.innerHTML = ''; 
                     for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                        // Só adiciona o item se o preço não estiver vazio
-                        if (price) {
+                        // Só adiciona o item se o preço não estiver vazio ou for diferente de "N/A"
+                        if (price && price !== "N/A") {
                             const listItem = document.createElement('li');
                             listItem.textContent = `${supermarket}: R$ ${price}`;
                             priceList.appendChild(listItem);
                         }
                     }
 
-                    // Mostra a div com as informações do produto
+                    // Mostra o contêiner do produto e esconde o botão de ler novamente
                     document.getElementById("productInfo").style.display = 'block';
-                    document.getElementById("readAgainBtn").style.display = 'inline-block';
+                    document.getElementById("readAgainBtn").style.display = 'block';
 
-                    // Oculta a câmera e o campo de entrada
-                    document.getElementById("interactive").style.display = 'none';
-                    document.getElementById("manualInput").style.display = 'none';
+                    // Limpa o campo de entrada
+                    document.getElementById("barcodeInput").value = '';
 
-                    Quagga.stop(); // Para a leitura assim que detectado
+                    // Reinicia a leitura
+                    startQuagga();
                 } else {
                     alert("Produto não encontrado.");
-                    document.getElementById("productInfo").style.display = 'none';
                 }
             }
 
-            // Função para reiniciar a leitura
+            // Evento para o botão de ler novamente
             document.getElementById("readAgainBtn").addEventListener("click", function() {
                 // Esconde as informações do produto
                 document.getElementById("productInfo").style.display = 'none';
-
-                // Mostra a câmera e o campo de entrada
+                // Mostra novamente o campo de entrada
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
 
