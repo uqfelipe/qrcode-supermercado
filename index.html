@@ -218,7 +218,7 @@
 
             // Função para exibir o produto
             function exibirProduto(code) {
-                const product = products.find(p => p.sku === code);
+                const product = products.find(p => p["produto-sku"] === code); // Atualizado para usar "produto-sku"
 
                 if (product) {
                     // Exibe as informações do produto
@@ -230,9 +230,12 @@
                     const priceList = document.getElementById("productPrices");
                     priceList.innerHTML = ''; 
                     for (let [supermarket, price] of Object.entries(product.supermercados)) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${supermarket}: R$ ${price}`;
-                        priceList.appendChild(listItem);
+                        // Só adiciona o item se o preço não estiver vazio
+                        if (price) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${supermarket}: R$ ${price}`;
+                            priceList.appendChild(listItem);
+                        }
                     }
 
                     // Mostra a div com as informações do produto
@@ -255,14 +258,14 @@
                 // Esconde as informações do produto
                 document.getElementById("productInfo").style.display = 'none';
 
-                // Mostra a câmera e o campo de entrada novamente
+                // Mostra a câmera e o campo de entrada
                 document.getElementById("interactive").style.display = 'block';
                 document.getElementById("manualInput").style.display = 'block';
 
-                // Esconde o botão de ler novamente
-                document.getElementById("readAgainBtn").style.display = 'none';
+                // Limpa o campo de entrada
+                document.getElementById("barcodeInput").value = '';
 
-                // Reinicia o Quagga
+                // Reinicia a leitura
                 startQuagga();
             });
         });
