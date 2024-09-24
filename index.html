@@ -223,7 +223,14 @@
                 if (product) {
                     // Exibe as informações do produto
                     document.getElementById("productName").innerHTML = product.nome;
-                    document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+
+                    // Verifica se os ingredientes não são "N/A" antes de exibir
+                    if (product.ingredientes && product.ingredientes !== "N/A") {
+                        document.getElementById("productIngredients").innerHTML = `Ingredientes: ${product.ingredientes}`;
+                    } else {
+                        document.getElementById("productIngredients").innerHTML = ""; // Limpa a área se for "N/A"
+                    }
+
                     document.getElementById("productImage").src = product.imagem;
 
                     // Exibe os preços nos supermercados
